@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import javax.ws.rs.client.ClientBuilder
 
 fun main(args: Array<String>) {
-
+    SobaOrderController().callKubeApi()
 }
 
 class SobaOrderController {
@@ -16,11 +16,13 @@ class SobaOrderController {
     fun callKubeApi() {
         logger.info("Connecting Kubernetes API server through localhost:8001.")
 
-        val client = ClientBuilder.newClient()
-        val target = client.target("http://localhost:8001")
-                .path("api/v1/sobaorders")
-        val resp = target.request().get()
-        logger.info("Received: ${resp}")
+        while (true) {
+            val client = ClientBuilder.newClient()
+            val target = client.target("http://localhost:8001")
+                    .path("api/v1/sobaorders")
+            val resp = target.request().get()
+            logger.info("Received: ${resp}")
+        }
     }
 
 }
