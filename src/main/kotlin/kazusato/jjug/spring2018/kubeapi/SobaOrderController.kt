@@ -21,7 +21,8 @@ class SobaOrderController {
             val target = client.target("http://localhost:8001")
                     .path("apis/kazusato.local/v1alpha1/sobaorders")
             val resp = target.request().get()
-            logger.info("Received: ${resp}")
+            logger.info("Response: ${resp}")
+            logger.info("Body: ${resp.entity}")
 
             Thread.sleep(10_000)
             logger.info("Sleep: 10 seconds")
