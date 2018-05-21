@@ -19,7 +19,7 @@ class SobaOrderController {
         while (true) {
             val client = ClientBuilder.newClient()
             val target = client.target("http://localhost:8001")
-                    .path("api/v1/sobaorders")
+                    .path("apis/kazusato.local/v1alpha1/sobaorders")
             val resp = target.request().get()
             logger.info("Received: ${resp}")
 
