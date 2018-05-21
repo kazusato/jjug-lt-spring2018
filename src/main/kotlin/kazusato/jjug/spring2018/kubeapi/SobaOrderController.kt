@@ -22,6 +22,9 @@ class SobaOrderController {
                     .path("api/v1/sobaorders")
             val resp = target.request().get()
             logger.info("Received: ${resp}")
+
+            Thread.sleep(10_000)
+            logger.info("Sleep: 10 seconds")
         }
     }
 
