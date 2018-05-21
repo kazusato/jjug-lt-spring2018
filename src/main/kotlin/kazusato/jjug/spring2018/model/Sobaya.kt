@@ -1,4 +1,5 @@
 package kazusato.jjug.spring2018.model
 
-data class
+data class Sobaya(var name: String) {
 
+}
