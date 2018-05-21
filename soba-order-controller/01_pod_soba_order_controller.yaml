@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: soba-order-controller
+spec:
+  containers:
+  - name: soba-order-controller
+    image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.0
+  imagePullSecrets:
+  - name: demoreg-reader3-secret
+
