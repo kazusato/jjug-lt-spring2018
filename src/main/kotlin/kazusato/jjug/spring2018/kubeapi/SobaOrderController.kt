@@ -22,7 +22,7 @@ class SobaOrderController {
                     .path("apis/kazusato.local/v1alpha1/sobaorders")
             val resp = target.request().get()
             logger.info("Response: ${resp}")
-            logger.info("Body: ${resp.entity}")
+            logger.info("Body: ${resp.readEntity(String::class.java)}")
 
             Thread.sleep(10_000)
             logger.info("Sleep: 10 seconds")
