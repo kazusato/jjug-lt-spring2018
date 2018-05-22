@@ -3,7 +3,6 @@ package kazusato.jjug.spring2018.kubeapi
 import org.glassfish.jersey.client.ChunkedInput
 import org.slf4j.LoggerFactory
 import java.io.StringReader
-import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.LinkedBlockingQueue
 import javax.json.Json
 import javax.json.JsonObject
@@ -25,14 +24,13 @@ class SobaOrderController {
     }
 
     fun callKubeApi() {
-        logger.info("Connecting Kubernetes API server through localhost:8001.")
+        logger.info("Connect to the Kubernetes API server through localhost:8001.")
 
+        var resourceVersion = initialQuery()
         while (true) {
-            val resourceVersion = initialQuery()
-            watchQuery(resourceVersion)
-
-            Thread.sleep(10_000)
-            logger.info("Watch query terminated: sleep 10 seconds and will retry.")
+            logger.info("Start watching.")
+            resourceVersion = watchQuery(resourceVersion)
+            logger.info("Watching terminated.")
         }
     }
 
@@ -47,12 +45,11 @@ class SobaOrderController {
 
         val resourceVersion = readResourceVersion(jsonStr)
         logger.info("Resource version: ${resourceVersion}")
-//        queue.push(jsonStr)
 
         return resourceVersion
     }
 
-    private fun watchQuery(resourceVersion: String) {
+    private fun watchQuery(resourceVersion: String): String {
         val target = client.target("http://localhost:8001")
                 .path("apis/kazusato.local/v1alpha1/sobaorders")
                 .queryParam("resourceVersion", resourceVersion)
@@ -60,10 +57,14 @@ class SobaOrderController {
         val resp = target.request().get()
 
         val chunkedInput = resp.readEntity(object : GenericType<ChunkedInput<String>>() {})
+        var newResourceVersion = resourceVersion
         while (true) {
-            val chunk = chunkedInput.read() ?: break
+            val chunk: String = chunkedInput.read() ?: break
+            newResourceVersion = readResourceVersion(chunk)
             logger.info("Chunk: ${chunk}")
         }
+
+        return newResourceVersion
     }
 
     private fun pushForInitialQuery(jsonStr: String) {
