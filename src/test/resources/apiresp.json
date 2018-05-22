@@ -1,0 +1,40 @@
+{
+  "apiVersion": "kazusato.local/v1alpha1",
+  "items": [
+    {
+      "apiVersion": "kazusato.local/v1alpha1",
+      "kind": "SobaOrder",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"kazusato.local/v1alpha1\",\"kind\":\"SobaOrder\",\"metadata\":{\"annotations\":{},\"name\":\"sato-20180521-001\",\"namespace\":\"jjug\"},\"spec\":{\"from\":\"3丁目の佐藤\",\"items\":[{\"count\":1,\"type\":\"Kake\"},{\"count\":2,\"type\":\"Zaru\"}]}}\n"
+        },
+        "clusterName": "",
+        "creationTimestamp": "2018-05-20T20:39:01Z",
+        "name": "sato-20180521-001",
+        "namespace": "jjug",
+        "resourceVersion": "399252",
+        "selfLink": "/apis/kazusato.local/v1alpha1/namespaces/jjug/sobaorders/sato-20180521-001",
+        "uid": "d44afcb7-5c6d-11e8-a68b-6e336080ff94"
+      },
+      "spec": {
+        "from": "3丁目の佐藤",
+        "items": [
+          {
+            "count": 1,
+            "type": "Kake"
+          },
+          {
+            "count": 2,
+            "type": "Zaru"
+          }
+        ]
+      }
+    }
+  ],
+  "kind": "SobaOrderList",
+  "metadata": {
+    "continue": "",
+    "resourceVersion": "617259",
+    "selfLink": "/apis/kazusato.local/v1alpha1/sobaorders"
+  }
+}
