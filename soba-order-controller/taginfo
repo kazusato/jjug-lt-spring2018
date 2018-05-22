@@ -1,0 +1,2 @@
+export PROXY_TAG=1.10-0.1.0
+export CONTROLLER_TAG=0.1.6
