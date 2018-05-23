@@ -60,7 +60,7 @@ class SobaOrderController {
         var newResourceVersion = resourceVersion
         while (true) {
             val chunk: String = chunkedInput.read() ?: break
-            newResourceVersion = readResourceVersion(chunk)
+            newResourceVersion = readResourceVersionFromChunk(chunk)
             logger.info("Chunk: ${chunk}")
         }
 
@@ -79,6 +79,14 @@ class SobaOrderController {
         val reader = Json.createReader(StringReader(jsonStr))
         val obj = reader.readObject()
         val metadata = obj.getJsonObject("metadata")
+        return metadata.getString("resourceVersion")
+    }
+
+    private fun readResourceVersionFromChunk(jsonStr: String): String {
+        val reader = Json.createReader(StringReader(jsonStr))
+        val obj = reader.readObject()
+        val targetObj = obj.getJsonObject("object")
+        val metadata = targetObj.getJsonObject("metadata")
         return metadata.getString("resourceVersion")
     }
 
