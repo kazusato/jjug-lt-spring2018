@@ -7,7 +7,7 @@ spec:
   - name: kubectl-proxy
     image: demoreg.azurecr.io/kazusato/kubectl-proxy:1.10-0.1.0
   - name: soba-order-controller
-    image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.8
+    image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.9
   imagePullSecrets:
   - name: demoreg-reader3-secret
 
