@@ -15,6 +15,8 @@ class SobaOrderControllerOkhttp {
 
     val queue = LinkedBlockingQueue<JsonObject>()
 
+    private lateinit var currentResourceVersion: String
+
     private val client = OkHttpClient.Builder()
             .readTimeout(60, TimeUnit.SECONDS)
             .build()
@@ -26,11 +28,11 @@ class SobaOrderControllerOkhttp {
     fun callKubeApi() {
         logger.info("Connect to the Kubernetes API server through localhost:8001.")
 
-        var resourceVersion = initialQuery()
+        initialQuery()
         while (true) {
-            logger.info("Start watching.")
+            logger.info("Start watching resources after: ${currentResourceVersion}")
             try {
-                resourceVersion = watchQuery(resourceVersion)
+                watchQuery()
             } catch (e: IOException) {
                 logger.info(e.message)
             }
@@ -38,7 +40,7 @@ class SobaOrderControllerOkhttp {
         }
     }
 
-    private fun initialQuery(): String {
+    private fun initialQuery() {
         val url = HttpUrl.Builder().scheme("http").host("localhost").port(8001)
                 .addPathSegment("apis/kazusato.local/v1alpha1/sobaorders")
                 .build()
@@ -54,36 +56,31 @@ class SobaOrderControllerOkhttp {
         logger.info("Body ${jsonStr}")
 
         val jsonObj = toJsonObject(jsonStr)
-        val resourceVersion = readResourceVersion(jsonObj)
-        logger.info("Resource version: ${resourceVersion}")
+        currentResourceVersion = readResourceVersion(jsonObj)
+        logger.info("Resource version: ${currentResourceVersion}")
 
         queue.put(jsonObj)
-
-        return resourceVersion
     }
 
-    private fun watchQuery(resourceVersion: String): String {
+    private fun watchQuery() {
         val url = HttpUrl.Builder().scheme("http").host("localhost").port(8001)
                 .addPathSegment("apis/kazusato.local/v1alpha1/sobaorders")
-                .addQueryParameter("resourceVersion", resourceVersion)
+                .addQueryParameter("resourceVersion", currentResourceVersion)
                 .addQueryParameter("watch", "1")
                 .build()
         val req = Request.Builder().url(url).build()
         val resp = client.newCall(req).execute()
 
-        var newResourceVersion = resourceVersion
         while (!resp.body()!!.source().exhausted()) {
             val chunk = resp.body()?.source()?.readUtf8Line() ?: throw RuntimeException("Null response body.")
             logger.info("Chunk: ${chunk}")
 
             val chunkObj = toJsonObject(chunk)
-            newResourceVersion = readResourceVersionFromChunk(chunkObj)
-            logger.info("Resource version: ${newResourceVersion}")
+            currentResourceVersion = readResourceVersionFromChunk(chunkObj)
+            logger.info("Resource version: ${currentResourceVersion}")
 
             queue.put(chunkObj)
         }
-
-        return newResourceVersion
     }
 
     private fun readResourceVersion(obj: JsonObject): String {

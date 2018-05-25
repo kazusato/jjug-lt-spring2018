@@ -13,10 +13,10 @@ class SobaOrderTwillioCaller(queue: BlockingQueue<JsonObject>) {
 
     private val queue: BlockingQueue<JsonObject>
 
-    private val fromNumber = System.getenv("FROM_NUMBER")
-    private val toNumber = System.getenv("TO_NUMBER")
-    private val accountSid: String = System.getenv("ACCOUNT_SID")
-    private val accessToken: String = System.getenv("ACCESS_TOKEN")
+    private val fromNumber = System.getenv("TWILIO_FROM_NUMBER")
+    private val toNumber = System.getenv("TWILIO_TO_NUMBER")
+    private val accountSid: String = System.getenv("TWILIO_ACCOUNT_SID")
+    private val accessToken: String = System.getenv("TWILIO_ACCESS_TOKEN")
 
     init {
         this.queue = queue
@@ -29,7 +29,11 @@ class SobaOrderTwillioCaller(queue: BlockingQueue<JsonObject>) {
             val dataList = retrieveData(jsonObj)
             dataList.forEach {
                 logger.info("Phone call: ${generatePhoneMessage(it)}")
-                twilio.call(fromNumber, toNumber, accountSid, accessToken, generatePhoneMessage(it))
+                if (System.getenv("TWILIO_CALL_ENABLED") == "true") {
+                    twilio.call(fromNumber, toNumber, accountSid, accessToken, generatePhoneMessage(it))
+                } else {
+                    logger.info("Twilio call disabled: skip calling.")
+                }
                 Thread.sleep(callIntervalMillis)
             }
         }
