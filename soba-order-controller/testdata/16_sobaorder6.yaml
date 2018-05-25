@@ -1,0 +1,9 @@
+apiVersion: kazusato.local/v1alpha1
+kind: SobaOrder
+metadata:
+  name: tanaka-20180523-004
+spec:
+  from: 2丁目の田中
+  items:
+  - type: Kake
+    count: 2

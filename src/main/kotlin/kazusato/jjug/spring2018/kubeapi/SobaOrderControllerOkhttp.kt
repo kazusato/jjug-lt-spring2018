@@ -1,31 +1,26 @@
 package kazusato.jjug.spring2018.kubeapi
 
-import org.glassfish.jersey.client.ChunkedInput
-import org.glassfish.jersey.client.ClientConfig
-import org.glassfish.jersey.logging.LoggingFeature
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.io.StringReader
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.logging.Level
+import java.util.concurrent.TimeUnit
 import javax.json.Json
 import javax.json.JsonObject
-import javax.ws.rs.client.Client
-import javax.ws.rs.client.ClientBuilder
-import javax.ws.rs.core.GenericType
-import javax.ws.rs.core.Response
 
-fun main(args: Array<String>) {
-    SobaOrderController().callKubeApi()
-}
-
-class SobaOrderController {
+class SobaOrderControllerOkhttp {
 
     private val queue = LinkedBlockingQueue<JsonObject>()
 
-    private val client = ClientBuilder.newClient()
+    private val client = OkHttpClient.Builder()
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build()
 
     companion object {
-        @JvmStatic private val logger = LoggerFactory.getLogger(SobaOrderController::class.java)
+        @JvmStatic private val logger = LoggerFactory.getLogger(SobaOrderControllerOkhttp::class.java)
     }
 
     fun callKubeApi() {
@@ -34,23 +29,29 @@ class SobaOrderController {
         var resourceVersion = initialQuery()
         while (true) {
             logger.info("Start watching.")
-            resourceVersion = watchQuery(resourceVersion)
+            try {
+                resourceVersion = watchQuery(resourceVersion)
+            } catch (e: IOException) {
+                logger.info(e.message)
+            }
             logger.info("Watching terminated.")
         }
     }
 
     private fun initialQuery(): String {
-        val target = client.target("http://localhost:8001")
-                .path("apis/kazusato.local/v1alpha1/sobaorders")
-        val resp = target.request().get()
+        val url = HttpUrl.Builder().scheme("http").host("localhost").port(8001)
+                .addPathSegment("apis/kazusato.local/v1alpha1/sobaorders")
+                .build()
+        val req = Request.Builder().url(url).build()
+        val resp = client.newCall(req).execute()
         logger.info("Response: ${resp}")
 
-        if (resp.status != Response.Status.OK.statusCode) {
-            throw RuntimeException("Response status: ${resp.status}")
+        if (!resp.isSuccessful) {
+            throw RuntimeException("Response status: ${resp.code()}")
         }
 
-        val jsonStr = resp.readEntity(String::class.java)
-        logger.info("Body: ${jsonStr}")
+        val jsonStr = resp.body()?.string() ?: throw RuntimeException("Null response body.")
+        logger.info("Body ${jsonStr}")
 
         val resourceVersion = readResourceVersion(jsonStr)
         logger.info("Resource version: ${resourceVersion}")
@@ -59,31 +60,23 @@ class SobaOrderController {
     }
 
     private fun watchQuery(resourceVersion: String): String {
-        val target = client.target("http://localhost:8001")
-                .path("apis/kazusato.local/v1alpha1/sobaorders")
-                .queryParam("resourceVersion", resourceVersion)
-                .queryParam("watch", "1")
-        val resp = target.request().get()
+        val url = HttpUrl.Builder().scheme("http").host("localhost").port(8001)
+                .addPathSegment("apis/kazusato.local/v1alpha1/sobaorders")
+                .addQueryParameter("resourceVersion", resourceVersion)
+                .addQueryParameter("watch", "1")
+                .build()
+        val req = Request.Builder().url(url).build()
+        val resp = client.newCall(req).execute()
 
-        val chunkedInput = resp.readEntity(object : GenericType<ChunkedInput<String>>() {})
         var newResourceVersion = resourceVersion
-        while (true) {
-            val chunk: String = chunkedInput.read() ?: break
+        while (!resp.body()!!.source().exhausted()) {
+            val chunk = resp.body()?.source()?.readUtf8Line() ?: throw RuntimeException("Null response body.")
             newResourceVersion = readResourceVersionFromChunk(chunk)
             logger.info("Chunk: ${chunk}")
-            // FIXME chunkを受け取ると、その直後に必ずHTTPがいったん終了するのはなぜ？
-            // FIXME なぜかcurlだとYAML投入後一瞬で受信するchunkが、ここだと30秒遅れる。
+            logger.info("Resource version: ${newResourceVersion}")
         }
 
         return newResourceVersion
-    }
-
-    private fun pushForInitialQuery(jsonStr: String) {
-
-    }
-
-    private fun clearQueue() {
-
     }
 
     private fun readResourceVersion(jsonStr: String): String {
