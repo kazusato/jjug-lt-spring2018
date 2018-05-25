@@ -8,10 +8,10 @@ spec:
     image: demoreg.azurecr.io/kazusato/kubectl-proxy:${PROXY_TAG}
   - name: soba-order-controller
     image: demoreg.azurecr.io/kazusato/soba-order-controller:${CONTROLLER_TAG}
-      envFrom:
-      - prefix: TWILIO_
-        configMapRef:
-          name: twilio-config
+    envFrom:
+    - prefix: TWILIO_
+      configMapRef:
+        name: twilio-config
   imagePullSecrets:
   - name: demoreg-reader3-secret
 
