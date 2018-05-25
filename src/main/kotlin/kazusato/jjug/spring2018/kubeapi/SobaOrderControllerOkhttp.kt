@@ -13,7 +13,7 @@ import javax.json.JsonObject
 
 class SobaOrderControllerOkhttp {
 
-    private val queue = LinkedBlockingQueue<JsonObject>()
+    val queue = LinkedBlockingQueue<JsonObject>()
 
     private val client = OkHttpClient.Builder()
             .readTimeout(60, TimeUnit.SECONDS)
@@ -53,8 +53,11 @@ class SobaOrderControllerOkhttp {
         val jsonStr = resp.body()?.string() ?: throw RuntimeException("Null response body.")
         logger.info("Body ${jsonStr}")
 
-        val resourceVersion = readResourceVersion(jsonStr)
+        val jsonObj = toJsonObject(jsonStr)
+        val resourceVersion = readResourceVersion(jsonObj)
         logger.info("Resource version: ${resourceVersion}")
+
+        queue.put(jsonObj)
 
         return resourceVersion
     }
@@ -71,28 +74,33 @@ class SobaOrderControllerOkhttp {
         var newResourceVersion = resourceVersion
         while (!resp.body()!!.source().exhausted()) {
             val chunk = resp.body()?.source()?.readUtf8Line() ?: throw RuntimeException("Null response body.")
-            newResourceVersion = readResourceVersionFromChunk(chunk)
             logger.info("Chunk: ${chunk}")
+
+            val chunkObj = toJsonObject(chunk)
+            newResourceVersion = readResourceVersionFromChunk(chunkObj)
             logger.info("Resource version: ${newResourceVersion}")
+
+            queue.put(chunkObj)
         }
 
         return newResourceVersion
     }
 
-    private fun readResourceVersion(jsonStr: String): String {
-        val reader = Json.createReader(StringReader(jsonStr))
-        val obj = reader.readObject()
+    private fun readResourceVersion(obj: JsonObject): String {
         val metadata = obj.getJsonObject("metadata")
         return metadata.getString("resourceVersion")
     }
 
-    private fun readResourceVersionFromChunk(jsonStr: String): String {
+    private fun readResourceVersionFromChunk(obj: JsonObject): String {
         // FIXME 複数のJSONが{...}{..1}{...}と1つのchunkに含まれている場合に対応できていない。
-        val reader = Json.createReader(StringReader(jsonStr))
-        val obj = reader.readObject()
         val targetObj = obj.getJsonObject("object")
         val metadata = targetObj.getJsonObject("metadata")
         return metadata.getString("resourceVersion")
+    }
+
+    private fun toJsonObject(jsonStr: String): JsonObject {
+        val reader = Json.createReader(StringReader(jsonStr))
+        return reader.readObject()
     }
 
 }

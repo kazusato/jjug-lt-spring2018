@@ -1,0 +1,28 @@
+{
+  "type": "ADDED",
+  "object": {
+    "apiVersion": "kazusato.local/v1alpha1",
+    "kind": "SobaOrder",
+    "metadata": {
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"kazusato.local/v1alpha1\",\"kind\":\"SobaOrder\",\"metadata\":{\"annotations\":{},\"name\":\"takahashi-20180523-001\",\"namespace\":\"jjug\"},\"spec\":{\"from\":\"1丁目の高橋\",\"items\":[{\"count\":1,\"type\":\"Wakame\"}]}}\n"
+      },
+      "clusterName": "",
+      "creationTimestamp": "2018-05-25T15:48:47Z",
+      "name": "takahashi-20180523-001",
+      "namespace": "jjug",
+      "resourceVersion": "922183",
+      "selfLink": "/apis/kazusato.local/v1alpha1/namespaces/jjug/sobaorders/takahashi-20180523-001",
+      "uid": "1c95f1b9-6033-11e8-a68b-6e336080ff94"
+    },
+    "spec": {
+      "from": "1丁目の高橋",
+      "items": [
+        {
+          "count": 1,
+          "type": "Wakame"
+        }
+      ]
+    }
+  }
+}

@@ -5,22 +5,20 @@ import org.junit.jupiter.api.Test
 import java.io.InputStreamReader
 import javax.json.Json
 
-class ReadApiRespTest {
+class ReadChunkTest {
 
     @Test
     fun readApiResp() {
-        InputStreamReader(this.javaClass.classLoader.getResourceAsStream("apiresp.json")).use {
+        InputStreamReader(this.javaClass.classLoader.getResourceAsStream("chunk.json")).use {
             val reader = Json.createReader(it)
             val obj = reader.readObject()
-            val metadata = obj.getJsonObject("metadata")
+            val targetObj = obj.getJsonObject("object")
+            val metadata = targetObj.getJsonObject("metadata")
             val resourceVersion = metadata.getString("resourceVersion")
-            assertEquals("617259", resourceVersion)
+            assertEquals("922183", resourceVersion)
 
             val array = obj.getJsonArray("items")
-            assertNotNull(array)
-
-            val targetObj = obj.getJsonObject("object")
-            assertNull(targetObj)
+            assertNull(array)
         }
     }
 
