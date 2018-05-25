@@ -6,4 +6,4 @@ RUN useradd kube && \
 ADD jjug-lt-spring2018-all.jar /home/kube
 USER kube
 WORKDIR /home/kube
-ENTRYPOINT ["java", "-cp", "jjug-lt-spring2018-all.jar", "kazusato.jjug.spring2018.kubeapi.SobaOrderControllerKt"]
+ENTRYPOINT ["java", "-cp", "jjug-lt-spring2018-all.jar", "kazusato.jjug.spring2018.exec.SobaOrderControllerMainKt"]
