@@ -1,13 +1,17 @@
 apiVersion: v1
 kind: Pod
-metadata:
+targetObj:
   name: soba-order-controller
 spec:
   containers:
   - name: kubectl-proxy
     image: demoreg.azurecr.io/kazusato/kubectl-proxy:1.10-0.1.0
   - name: soba-order-controller
-    image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.9
+    image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.10
+      envFrom:
+      - prefix: TWILIO_
+        configMapRef:
+          name: twilio-config
   imagePullSecrets:
   - name: demoreg-reader3-secret
 
