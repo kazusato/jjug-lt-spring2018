@@ -1,0 +1,9 @@
+apiVersion: kazusato.local/v1alpha1
+kind: SobaOrder
+metadata:
+  name: tanaka-20180523-006
+spec:
+  from: 2丁目の田中
+  items:
+  - type: Mori
+    count: 3

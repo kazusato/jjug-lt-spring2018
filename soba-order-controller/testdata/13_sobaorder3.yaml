@@ -1,0 +1,9 @@
+apiVersion: kazusato.local/v1alpha1
+kind: SobaOrder
+metadata:
+  name: takahashi-20180523-001
+spec:
+  from: 1丁目の高橋
+  items:
+  - type: Wakame
+    count: 1

@@ -1,0 +1,11 @@
+apiVersion: kazusato.local/v1alpha1
+kind: SobaOrder
+metadata:
+  name: sato-20180521-001
+spec:
+  from: 3丁目の佐藤
+  items:
+  - type: Kake
+    count: 1
+  - type: Zaru
+    count: 2
