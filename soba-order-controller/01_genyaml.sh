@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 . taginfo
 
-filename=01_pod_soba_order_controller.yaml
+filenames="01_pod_soba_order_controller.yaml 10_deploy_soba_order_controller.yaml"
 
-envsubst \
- < template/${filename}.template \
- > ${filename}
-
+for i in $filenames
+do
+    envsubst \
+     < template/${i}.template \
+     > ${i}
+done

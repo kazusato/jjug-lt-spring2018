@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soba-order-controller
+  labels:
+    app: soba-order-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: soba-order-controller
+  template:
+    metadata:
+      labels:
+        app: soba-order-controller
+    spec:
+      containers:
+      - name: kubectl-proxy
+        image: demoreg.azurecr.io/kazusato/kubectl-proxy:1.10-0.1.0
+      - name: soba-order-controller
+        image: demoreg.azurecr.io/kazusato/soba-order-controller:0.1.11
+        envFrom:
+        - prefix: TWILIO_
+          configMapRef:
+            name: twilio-config
+      imagePullSecrets:
+      - name: demoreg-reader3-secret

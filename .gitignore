@@ -12,3 +12,4 @@
 /docker/files/*.war
 /temp/
 *.jar
+.DS_Store
